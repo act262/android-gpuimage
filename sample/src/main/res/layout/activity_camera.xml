@@ -24,6 +24,24 @@
         app:gpuimage_show_loading="false"
         app:gpuimage_surface_type="texture_view" /> <!-- surface_view or texture_view -->
 
+
+    <jp.co.cyberagent.android.gpuimage.GPUImageView
+        android:id="@+id/surfaceView_small"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:gpuimage_show_loading="true"
+        app:gpuimage_surface_type="surface_view" />
+
+    <ImageView
+        android:id="@+id/img_switch_orientation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:contentDescription="@null"
+        android:padding="10dp"
+        android:src="@android:drawable/ic_menu_zoom"
+        tools:ignore="HardcodedText,RtlHardcoded" />
+
     <ImageView
         android:id="@+id/img_switch_camera"
         android:layout_width="wrap_content"
@@ -39,7 +57,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#000000"
+        android:background="#7f000000"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 

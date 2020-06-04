@@ -16,6 +16,9 @@
 
 package jp.co.cyberagent.android.gpuimage.sample.activity
 
+import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -37,6 +40,11 @@ import jp.co.cyberagent.android.gpuimage.util.Rotation
 class CameraActivity : AppCompatActivity() {
 
     private val gpuImageView: GPUImageView by lazy { findViewById<GPUImageView>(R.id.surfaceView) }
+    private val smallGPUImageView: GPUImageView by lazy { findViewById<GPUImageView>(R.id.surfaceView_small) }
+
+    private var currentGPUImageView: GPUImageView? = null
+    private var smallView: Boolean = false
+
     private val seekBar: SeekBar by lazy { findViewById<SeekBar>(R.id.seekBar) }
     private val cameraLoader: CameraLoader by lazy {
         if (Build.VERSION.SDK_INT < 21) {
@@ -49,6 +57,7 @@ class CameraActivity : AppCompatActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        println("onCreate")
         setContentView(R.layout.activity_camera)
 
         seekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
@@ -65,25 +74,65 @@ class CameraActivity : AppCompatActivity() {
         findViewById<View>(R.id.button_capture).setOnClickListener {
             saveSnapshot()
         }
+        findViewById<View>(R.id.img_switch_orientation).setOnClickListener(View.OnClickListener {
+            setOrientation()
+        })
+
         findViewById<View>(R.id.img_switch_camera).run {
             if (!cameraLoader.hasMultipleCamera()) {
                 visibility = View.GONE
             }
             setOnClickListener {
                 cameraLoader.switchCamera()
-                gpuImageView.setRotation(getRotation(cameraLoader.getCameraOrientation()))
+                currentGPUImageView?.setRotation(getRotation(cameraLoader.getCameraOrientation()))
             }
         }
+
         cameraLoader.setOnPreviewFrameListener { data, width, height ->
-            gpuImageView.updatePreviewFrame(data, width, height)
+            currentGPUImageView?.updatePreviewFrame(data, width, height)
         }
+
         gpuImageView.setRotation(getRotation(cameraLoader.getCameraOrientation()))
         gpuImageView.setRenderMode(GPUImageView.RENDERMODE_CONTINUOUSLY)
+
+        smallGPUImageView.setRotation(getRotation(cameraLoader.getCameraOrientation()))
+        smallGPUImageView.setRenderMode(GPUImageView.RENDERMODE_CONTINUOUSLY)
+
+        smallGPUImageView.setOnClickListener {
+            switchView()
+        }
+
+        gpuImageView.setOnClickListener {
+            switchView()
+        }
+
+        currentGPUImageView = gpuImageView
+    }
+
+
+    fun switchView() {
+        var filter = currentGPUImageView?.filter
+
+        if (smallView) {
+            smallView = false
+            currentGPUImageView = gpuImageView
+            gpuImageView.visibility = View.VISIBLE
+            smallGPUImageView.visibility = View.INVISIBLE
+        } else {
+            smallView = true
+            currentGPUImageView = smallGPUImageView
+            smallGPUImageView.visibility = View.VISIBLE
+            gpuImageView.visibility = View.INVISIBLE
+        }
+        if (filter != null) {
+            currentGPUImageView?.filter = filter
+        }
+        currentGPUImageView?.setRotation(getRotation(cameraLoader.getCameraOrientation()))
     }
 
     override fun onResume() {
         super.onResume()
-        gpuImageView.doOnLayout {
+        currentGPUImageView?.doOnLayout {
             cameraLoader.onResume(it.width, it.height)
         }
     }
@@ -96,9 +145,29 @@ class CameraActivity : AppCompatActivity() {
     private fun saveSnapshot() {
         val folderName = "GPUImage"
         val fileName = System.currentTimeMillis().toString() + ".jpg"
-        gpuImageView.saveToPictures(folderName, fileName) {
+        currentGPUImageView?.saveToPictures(folderName, fileName) {
             Toast.makeText(this, "$folderName/$fileName saved", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    @SuppressLint("SourceLockedOrientationActivity")
+    private fun setOrientation() {
+        when (resources.configuration.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            }
+            Configuration.ORIENTATION_PORTRAIT -> {
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            }
+            else -> {
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        println("onConfigurationChanged $newConfig")
+        currentGPUImageView?.setRotation(getRotation(cameraLoader.getCameraOrientation()))
     }
 
     private fun getRotation(orientation: Int): Rotation {
@@ -111,8 +180,8 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun switchFilterTo(filter: GPUImageFilter) {
-        if (gpuImageView.filter == null || gpuImageView.filter!!.javaClass != filter.javaClass) {
-            gpuImageView.filter = filter
+        if (currentGPUImageView?.filter == null || currentGPUImageView?.filter!!.javaClass != filter.javaClass) {
+            currentGPUImageView?.filter = filter
             filterAdjuster = FilterAdjuster(filter)
             filterAdjuster?.adjust(seekBar.progress)
         }
