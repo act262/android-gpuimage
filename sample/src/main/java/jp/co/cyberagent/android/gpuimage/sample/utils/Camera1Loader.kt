@@ -15,7 +15,12 @@ class Camera1Loader(private val activity: Activity) : CameraLoader() {
     private var cameraInstance: Camera? = null
     private var cameraFacing: Int = Camera.CameraInfo.CAMERA_FACING_BACK
 
+    private var viewWidth: Int = 0
+    private var viewHeight: Int = 0
+
     override fun onResume(width: Int, height: Int) {
+        viewWidth = width
+        viewHeight = height
         setUpCamera()
     }
 
@@ -73,6 +78,8 @@ class Camera1Loader(private val activity: Activity) : CameraLoader() {
         if (parameters.supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
             parameters.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
         }
+        val size = chooseOptimalSize()
+        parameters.setPreviewSize(size.width, size.height)
         cameraInstance!!.parameters = parameters
 
         cameraInstance!!.setPreviewCallback { data, camera ->
@@ -120,7 +127,26 @@ class Camera1Loader(private val activity: Activity) : CameraLoader() {
         cameraInstance = null
     }
 
+    private fun chooseOptimalSize(): Camera.Size {
+        if (viewWidth == 0 || viewHeight == 0) {
+            return cameraInstance!!.Size(0, 0)
+        }
+        val outputSizes = cameraInstance?.parameters?.supportedPreviewSizes as List<Camera.Size>
+
+        val orientation = getCameraOrientation()
+        val maxPreviewWidth = if (orientation == 90 or 270) viewHeight else viewWidth
+        val maxPreviewHeight = if (orientation == 90 or 270) viewWidth else viewHeight
+
+        return outputSizes.filter {
+            it.width < maxPreviewWidth / 2 && it.height < maxPreviewHeight / 2
+        }.maxBy {
+            it.width * it.height
+        } ?: cameraInstance!!.Size(Camera1Loader.PREVIEW_WIDTH, Camera1Loader.PREVIEW_HEIGHT)
+    }
+
     companion object {
         private const val TAG = "Camera1Loader"
+        private const val PREVIEW_WIDTH = 480
+        private const val PREVIEW_HEIGHT = 640
     }
 }
