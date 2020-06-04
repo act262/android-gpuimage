@@ -15,6 +15,8 @@ abstract class CameraLoader {
 
     abstract fun hasMultipleCamera(): Boolean
 
+    abstract fun isFrontCamera(): Boolean
+
     fun setOnPreviewFrameListener(onPreviewFrame: (data: ByteArray, width: Int, height: Int) -> Unit) {
         this.onPreviewFrame = onPreviewFrame
     }

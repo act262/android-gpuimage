@@ -58,14 +58,18 @@ class Camera2Loader(private val activity: Activity) : CameraLoader() {
         val characteristics = cameraManager.getCameraCharacteristics(cameraId)
         val orientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: return 0
         return if (cameraFacing == CameraCharacteristics.LENS_FACING_FRONT) {
-            (orientation + degrees) % 360
+            (360 - (orientation + degrees) % 360) % 360
         } else { // back-facing
-            (orientation - degrees) % 360
+            (orientation - degrees + 360) % 360
         }
     }
 
     override fun hasMultipleCamera(): Boolean {
         return cameraManager.cameraIdList.size > 1
+    }
+
+    override fun isFrontCamera(): Boolean {
+        return cameraFacing == CameraCharacteristics.LENS_FACING_FRONT
     }
 
     @SuppressLint("MissingPermission")
@@ -106,9 +110,9 @@ class Camera2Loader(private val activity: Activity) : CameraLoader() {
 
         try {
             cameraInstance?.createCaptureSession(
-                listOf(imageReader!!.surface),
-                CaptureStateCallback(),
-                null
+                    listOf(imageReader!!.surface),
+                    CaptureStateCallback(),
+                    null
             )
         } catch (e: CameraAccessException) {
             Log.e(TAG, "Failed to start camera session")
@@ -121,8 +125,8 @@ class Camera2Loader(private val activity: Activity) : CameraLoader() {
         }
         val cameraId = getCameraId(cameraFacing) ?: return Size(0, 0)
         val outputSizes = cameraManager.getCameraCharacteristics(cameraId)
-            .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-            ?.getOutputSizes(ImageFormat.YUV_420_888)
+                .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                ?.getOutputSizes(ImageFormat.YUV_420_888)
 
         val orientation = getCameraOrientation()
         val maxPreviewWidth = if (orientation == 90 or 270) viewHeight else viewWidth

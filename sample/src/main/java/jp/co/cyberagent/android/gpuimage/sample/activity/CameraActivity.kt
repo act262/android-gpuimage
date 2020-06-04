@@ -43,7 +43,7 @@ class CameraActivity : AppCompatActivity() {
     private val smallGPUImageView: GPUImageView by lazy { findViewById<GPUImageView>(R.id.surfaceView_small) }
 
     private var currentGPUImageView: GPUImageView? = null
-    private var smallView: Boolean = false
+    private var smallView: Boolean = true
 
     private val seekBar: SeekBar by lazy { findViewById<SeekBar>(R.id.seekBar) }
     private val cameraLoader: CameraLoader by lazy {
@@ -84,7 +84,7 @@ class CameraActivity : AppCompatActivity() {
             }
             setOnClickListener {
                 cameraLoader.switchCamera()
-                currentGPUImageView?.setRotation(getRotation(cameraLoader.getCameraOrientation()))
+                setRenderRotation()
             }
         }
 
@@ -92,10 +92,10 @@ class CameraActivity : AppCompatActivity() {
             currentGPUImageView?.updatePreviewFrame(data, width, height)
         }
 
-        gpuImageView.setRotation(getRotation(cameraLoader.getCameraOrientation()))
+//        gpuImageView.setRotation(getRotation(cameraLoader.getCameraOrientation()))
         gpuImageView.setRenderMode(GPUImageView.RENDERMODE_CONTINUOUSLY)
 
-        smallGPUImageView.setRotation(getRotation(cameraLoader.getCameraOrientation()))
+//        smallGPUImageView.setRotation(getRotation(cameraLoader.getCameraOrientation()))
         smallGPUImageView.setRenderMode(GPUImageView.RENDERMODE_CONTINUOUSLY)
 
         smallGPUImageView.setOnClickListener {
@@ -106,7 +106,7 @@ class CameraActivity : AppCompatActivity() {
             switchView()
         }
 
-        currentGPUImageView = gpuImageView
+        switchView()
     }
 
 
@@ -127,7 +127,12 @@ class CameraActivity : AppCompatActivity() {
         if (filter != null) {
             currentGPUImageView?.filter = filter
         }
-        currentGPUImageView?.setRotation(getRotation(cameraLoader.getCameraOrientation()))
+
+        setRenderRotation()
+    }
+
+    private fun setRenderRotation() {
+        currentGPUImageView?.setRotation(getRotation(cameraLoader.getCameraOrientation()), cameraLoader.isFrontCamera(), false)
     }
 
     override fun onResume() {
@@ -167,7 +172,7 @@ class CameraActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         println("onConfigurationChanged $newConfig")
-        currentGPUImageView?.setRotation(getRotation(cameraLoader.getCameraOrientation()))
+        setRenderRotation()
     }
 
     private fun getRotation(orientation: Int): Rotation {

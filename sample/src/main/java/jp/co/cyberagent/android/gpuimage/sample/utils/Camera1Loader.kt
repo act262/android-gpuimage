@@ -85,6 +85,10 @@ class Camera1Loader(private val activity: Activity) : CameraLoader() {
         return 0
     }
 
+    override fun isFrontCamera(): Boolean {
+        return cameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT
+    }
+
     private fun getCameraInstance(id: Int): Camera {
         return try {
             Camera.open(id)

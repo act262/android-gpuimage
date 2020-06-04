@@ -223,6 +223,12 @@ public class GPUImageView extends FrameLayout {
         requestRender();
     }
 
+    public void setRotation(final Rotation rotation,
+                            final boolean flipHorizontal, final boolean flipVertical) {
+        gpuImage.setRotation(rotation, flipHorizontal, flipVertical);
+        requestRender();
+    }
+
     /**
      * Set the filter to be applied on the image.
      *
