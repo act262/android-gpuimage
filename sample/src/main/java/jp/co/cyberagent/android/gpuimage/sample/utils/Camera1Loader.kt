@@ -3,9 +3,12 @@
 package jp.co.cyberagent.android.gpuimage.sample.utils
 
 import android.app.Activity
+import android.graphics.SurfaceTexture
 import android.hardware.Camera
+import android.opengl.GLES20
 import android.util.Log
 import android.view.Surface
+import jp.co.cyberagent.android.gpuimage.sample.activity.CameraActivity
 
 class Camera1Loader(private val activity: Activity) : CameraLoader() {
 
@@ -38,10 +41,18 @@ class Camera1Loader(private val activity: Activity) : CameraLoader() {
             Surface.ROTATION_270 -> 270
             else -> 0
         }
+        val cameraInfo = Camera.CameraInfo()
+        for (id in 0 until Camera.getNumberOfCameras()) {
+            Camera.getCameraInfo(id, cameraInfo)
+            if (cameraInfo.facing == cameraFacing) {
+                break
+            }
+        }
+        val orientation = cameraInfo.orientation
         return if (cameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            (90 + degrees) % 360
+            (360 - (orientation + degrees) % 360) % 360
         } else { // back-facing
-            (90 - degrees) % 360
+            (orientation - degrees + 360) % 360
         }
     }
 
@@ -71,6 +82,12 @@ class Camera1Loader(private val activity: Activity) : CameraLoader() {
             val size = camera.parameters.previewSize
             onPreviewFrame?.invoke(data, size.width, size.height)
         }
+
+        val textures = IntArray(1)
+        GLES20.glGenTextures(1, textures, 0)
+        val surfaceTexture = SurfaceTexture(textures[0])
+        cameraInstance!!.setPreviewTexture(surfaceTexture)
+        (activity as CameraActivity).currentGPUImageView?.setupSurfaceTexture(surfaceTexture)
         cameraInstance!!.startPreview()
     }
 

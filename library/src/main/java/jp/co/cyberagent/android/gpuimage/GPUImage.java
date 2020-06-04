@@ -25,6 +25,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
@@ -204,6 +205,10 @@ public class GPUImage {
         renderer.setRotationCamera(rotation, flipHorizontal, flipVertical);
     }
 
+    public void setupSurfaceTexture(SurfaceTexture surfaceTexture) {
+        renderer.setupSurfaceTexture(surfaceTexture);
+    }
+
     /**
      * Sets the filter which should be applied to the image which was (or will
      * be) set by setImage(...).
@@ -259,7 +264,7 @@ public class GPUImage {
      * @return array with width and height of bitmap image
      */
     public int[] getScaleSize() {
-        return new int[] {scaleWidth, scaleHeight};
+        return new int[]{scaleWidth, scaleHeight};
     }
 
     /**

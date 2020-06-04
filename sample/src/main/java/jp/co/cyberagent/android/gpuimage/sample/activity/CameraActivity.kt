@@ -42,7 +42,7 @@ class CameraActivity : AppCompatActivity() {
     private val gpuImageView: GPUImageView by lazy { findViewById<GPUImageView>(R.id.surfaceView) }
     private val smallGPUImageView: GPUImageView by lazy { findViewById<GPUImageView>(R.id.surfaceView_small) }
 
-    private var currentGPUImageView: GPUImageView? = null
+     var currentGPUImageView: GPUImageView? = null
     private var smallView: Boolean = true
 
     private val seekBar: SeekBar by lazy { findViewById<SeekBar>(R.id.seekBar) }
@@ -84,6 +84,7 @@ class CameraActivity : AppCompatActivity() {
             }
             setOnClickListener {
                 cameraLoader.switchCamera()
+                currentGPUImageView?.gpuImage?.deleteImage()
                 setRenderRotation()
             }
         }

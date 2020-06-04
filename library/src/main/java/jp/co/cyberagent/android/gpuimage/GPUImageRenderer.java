@@ -161,6 +161,7 @@ public class GPUImageRenderer implements GLSurfaceView.Renderer, GLTextureView.R
             runOnDraw(new Runnable() {
                 @Override
                 public void run() {
+                    long time = System.currentTimeMillis();
                     if (imageWidth != width || imageHeight != height) {
                         glRgbBuffer = null;
                         glRgbBuffer = IntBuffer.allocate(width * height);
@@ -196,6 +197,10 @@ public class GPUImageRenderer implements GLSurfaceView.Renderer, GLTextureView.R
                 }
             }
         });
+    }
+
+    public void setupSurfaceTexture(SurfaceTexture surfaceTexture) {
+        this.surfaceTexture = surfaceTexture;
     }
 
     public void setFilter(final GPUImageFilter filter) {

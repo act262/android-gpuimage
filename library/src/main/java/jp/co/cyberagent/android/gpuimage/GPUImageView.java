@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -152,6 +153,10 @@ public class GPUImageView extends FrameLayout {
     public void setUpCamera(final Camera camera, final int degrees, final boolean flipHorizontal,
                             final boolean flipVertical) {
         gpuImage.setUpCamera(camera, degrees, flipHorizontal, flipVertical);
+    }
+
+    public void setupSurfaceTexture(SurfaceTexture surfaceTexture) {
+        gpuImage.setupSurfaceTexture(surfaceTexture);
     }
 
     /**
